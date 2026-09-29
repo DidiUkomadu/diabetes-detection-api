@@ -2,7 +2,8 @@
 
 A machine learning model from my MSc Data Science thesis that predicts whether a patient has diabetes. It is served with FastAPI, containerized with Docker, and deployed on Render.
 
-**Live demo:** _add your Render URL here_
+**Live demo:** https://diabetes-detection-api-hc2z.onrender.com
+
 
 ## Model
 
@@ -23,11 +24,11 @@ Run `python train.py` to see the test-set metrics (80/20 stratified split).
 | GET    | `/docs`    | Interactive Swagger docs         |
 
 ```bash
-curl -X POST https://<your-app>.onrender.com/predict \
+curl -X POST https://diabetes-detection-api-hc2z.onrender.com/predict \
   -H "Content-Type: application/json" \
   -d '{"gender":"Female","age":54,"hypertension":0,"heart_disease":0,
        "smoking_history":"never","bmi":27.3,"HbA1c_level":6.6,"blood_glucose_level":140}'
-# {"diabetes": false, "probability": 0.1234}
+# {"diabetes": false, "probability": 0.0878}
 ```
 
 ## Run locally
