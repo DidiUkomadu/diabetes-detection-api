@@ -23,6 +23,9 @@ from xgboost import XGBClassifier
 ROOT = Path(__file__).parent
 DATA_PATH = ROOT / "data" / "diabetes_prediction_dataset.csv"
 MODEL_PATH = ROOT / "model" / "diabetes_model.joblib"
+# Decision threshold used by the API (app/main.py). Chosen to balance precision and
+# recall on the diabetic class instead of the default 0.5, which missed a third of them.
+THRESHOLD = 0.25
 
 CATEGORICAL = ["gender", "smoking_history"]
 NUMERIC = ["age", "hypertension", "heart_disease", "bmi", "HbA1c_level", "blood_glucose_level"]
@@ -68,7 +71,8 @@ def main() -> None:
     model = build_model()
     model.fit(x_train, y_train)
 
-    y_pred = model.predict(x_test)
+    y_pred = (model.predict_proba(x_test)[:, 1] >= THRESHOLD).astype(int)
+    print(f"Threshold: {THRESHOLD}")
     print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
     print(classification_report(y_test, y_pred))
     print(confusion_matrix(y_test, y_pred))

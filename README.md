@@ -18,19 +18,30 @@ A machine learning model from my MSc Data Science thesis that predicts whether a
 
 Test set of 20,000 patients (80/20 stratified split, `random_state=42`). Run `python train.py` to reproduce.
 
+Only 8.5% of patients have diabetes, so accuracy alone is misleading. With the default 0.5 decision threshold the model was 97% accurate but missed a third of diabetic patients (recall 0.67). For a screening tool a missed case costs more than a false alarm, so the API flags diabetes when the predicted probability is **0.25 or higher**, the point where precision and recall on the diabetic class are roughly balanced.
+
 | Class        | Precision | Recall | F1   | Support |
 |--------------|-----------|--------|------|---------|
-| No diabetes  | 0.97      | 1.00   | 0.98 | 18,300  |
-| Diabetes     | 0.97      | 0.67   | 0.79 | 1,700   |
+| No diabetes  | 0.98      | 0.98   | 0.98 | 18,300  |
+| Diabetes     | 0.74      | 0.78   | 0.76 | 1,700   |
 
-**Accuracy:** 0.970
+**Accuracy:** 0.958
 
 |                       | Predicted no | Predicted yes |
 |-----------------------|--------------|---------------|
-| **Actual no**         | 18,266       | 34            |
-| **Actual yes**        | 560          | 1,140         |
+| **Actual no**         | 17,845       | 455           |
+| **Actual yes**        | 382          | 1,318         |
 
-Only 8.5% of patients have diabetes, so accuracy alone is misleading. The model is precise when it predicts diabetes, but it misses about a third of diabetic patients (recall 0.67). For screening, lowering the decision threshold below 0.5 would trade some precision for higher recall.
+How the threshold trades missed cases against false alarms on the diabetic class:
+
+| Threshold | Precision | Recall | Diabetics caught (of 1,700) | False alarms |
+|-----------|-----------|--------|-----------------------------|--------------|
+| 0.50      | 0.97      | 0.67   | 1,140                       | 34           |
+| 0.40      | 0.93      | 0.69   | 1,180                       | 92           |
+| 0.30      | 0.82      | 0.74   | 1,262                       | 271          |
+| **0.25**  | **0.74**  | **0.78** | **1,318**                 | **455**      |
+| 0.20      | 0.65      | 0.82   | 1,395                       | 768          |
+| 0.10      | 0.43      | 0.93   | 1,586                       | 2,138        |
 
 ## API
 

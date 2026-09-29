@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import THRESHOLD, app
 
 client = TestClient(app)
 
@@ -29,7 +29,7 @@ def test_index_serves_form():
 def test_predict_returns_probability():
     body = client.post("/predict", json=PATIENT).json()
     assert 0 <= body["probability"] <= 1
-    assert body["diabetes"] == (body["probability"] >= 0.5)
+    assert body["diabetes"] == (body["probability"] >= THRESHOLD)
 
 
 def test_high_risk_patient_scores_higher():
