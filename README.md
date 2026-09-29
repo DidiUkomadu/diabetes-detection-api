@@ -1,5 +1,7 @@
 # Diabetes Detection API
 
+[![Tests](https://github.com/DidiUkomadu/diabetes-detection-api/actions/workflows/tests.yml/badge.svg)](https://github.com/DidiUkomadu/diabetes-detection-api/actions/workflows/tests.yml)
+
 A machine learning model from my MSc Data Science thesis that predicts whether a patient has diabetes. It is served with FastAPI, containerized with Docker, and deployed on Render.
 
 **Live demo:** https://diabetes-detection-api-hc2z.onrender.com
@@ -12,7 +14,23 @@ A machine learning model from my MSc Data Science thesis that predicts whether a
 - **Features:** gender, age, hypertension, heart disease, smoking history, BMI, HbA1c level, blood glucose level
 - **Preprocessing:** BMI, HbA1c and glucose values more than 3 standard deviations above the mean are replaced with the mean; categories are encoded and numeric features standardized inside a scikit-learn `Pipeline`, so the API accepts raw values.
 
-Run `python train.py` to see the test-set metrics (80/20 stratified split).
+### Results
+
+Test set of 20,000 patients (80/20 stratified split, `random_state=42`). Run `python train.py` to reproduce.
+
+| Class        | Precision | Recall | F1   | Support |
+|--------------|-----------|--------|------|---------|
+| No diabetes  | 0.97      | 1.00   | 0.98 | 18,300  |
+| Diabetes     | 0.97      | 0.67   | 0.79 | 1,700   |
+
+**Accuracy:** 0.970
+
+|                       | Predicted no | Predicted yes |
+|-----------------------|--------------|---------------|
+| **Actual no**         | 18,266       | 34            |
+| **Actual yes**        | 560          | 1,140         |
+
+Only 8.5% of patients have diabetes, so accuracy alone is misleading. The model is precise when it predicts diabetes, but it misses about a third of diabetic patients (recall 0.67). For screening, lowering the decision threshold below 0.5 would trade some precision for higher recall.
 
 ## API
 
