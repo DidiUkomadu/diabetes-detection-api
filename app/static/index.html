@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diabetes Detection</title>
+<style>
+  :root { --accent: #2563eb; --bg: #f6f7f9; --card: #fff; --text: #1f2937; --muted: #6b7280; --border: #d1d5db; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 2rem 1rem; }
+  main { max-width: 560px; margin: 0 auto; background: var(--card); border-radius: 12px; padding: 1.75rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  h1 { margin: 0 0 .25rem; font-size: 1.5rem; }
+  p.sub { margin: 0 0 1.5rem; color: var(--muted); }
+  form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  label { display: flex; flex-direction: column; gap: .3rem; font-weight: 600; font-size: .9rem; }
+  input, select { font: inherit; padding: .5rem .6rem; border: 1px solid var(--border); border-radius: 6px; }
+  button { grid-column: 1 / -1; font: inherit; font-weight: 600; padding: .7rem; border: 0; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer; }
+  button:disabled { opacity: .6; }
+  #result { margin-top: 1.25rem; padding: 1rem; border-radius: 8px; display: none; }
+  #result.pos { display: block; background: #fef2f2; color: #991b1b; }
+  #result.neg { display: block; background: #f0fdf4; color: #166534; }
+  #result.err { display: block; background: #fffbeb; color: #92400e; }
+  footer { margin-top: 1.5rem; font-size: .8rem; color: var(--muted); }
+  @media (max-width: 480px) { form { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Diabetes Detection</h1>
+  <p class="sub">Enter patient details to estimate diabetes risk.</p>
+  <form id="form">
+    <label>Gender
+      <select name="gender"><option>Female</option><option>Male</option><option>Other</option></select>
+    </label>
+    <label>Age (years)
+      <input name="age" type="number" step="any" min="0" max="120" value="54" required>
+    </label>
+    <label>Hypertension
+      <select name="hypertension"><option value="0">No</option><option value="1">Yes</option></select>
+    </label>
+    <label>Heart disease
+      <select name="heart_disease"><option value="0">No</option><option value="1">Yes</option></select>
+    </label>
+    <label>Smoking history
+      <select name="smoking_history">
+        <option value="never">Never</option><option value="former">Former</option>
+        <option value="current">Current</option><option value="not current">Not current</option>
+        <option value="ever">Ever</option><option value="No Info">No info</option>
+      </select>
+    </label>
+    <label>BMI
+      <input name="bmi" type="number" step="any" min="1" max="100" value="27.3" required>
+    </label>
+    <label>HbA1c level (%)
+      <input name="HbA1c_level" type="number" step="any" min="1" max="20" value="6.6" required>
+    </label>
+    <label>Blood glucose (mg/dL)
+      <input name="blood_glucose_level" type="number" step="any" min="1" max="500" value="140" required>
+    </label>
+    <button type="submit">Predict</button>
+  </form>
+  <div id="result" role="status"></div>
+  <footer>For educational use only, not a medical diagnosis. API docs at <a href="/docs">/docs</a>.</footer>
+</main>
+<script>
+  const form = document.getElementById("form");
+  const result = document.getElementById("result");
+  const numeric = ["age", "hypertension", "heart_disease", "bmi", "HbA1c_level", "blood_glucose_level"];
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const button = form.querySelector("button");
+    button.disabled = true;
+    const body = Object.fromEntries(new FormData(form));
+    numeric.forEach((k) => (body[k] = Number(body[k])));
+    try {
+      const res = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      const { diabetes, probability } = await res.json();
+      const pct = (probability * 100).toFixed(1);
+      result.className = diabetes ? "pos" : "neg";
+      result.textContent = diabetes
+        ? `Likely diabetic: ${pct}% estimated probability.`
+        : `Unlikely diabetic: ${pct}% estimated probability.`;
+    } catch (err) {
+      result.className = "err";
+      result.textContent = err.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
